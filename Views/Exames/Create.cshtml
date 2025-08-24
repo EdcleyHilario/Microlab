@@ -1,0 +1,47 @@
+﻿@using Microlab.web.Models.Entities
+@model Exame
+
+<div class="container mt-4">
+    <h2>Novo Exame</h2>
+    <hr />
+
+    <form asp-action="Create" method="post">
+        <input type="hidden" asp-for="PacienteId" />
+
+        <!-- Dropdown de Exame -->
+        <div class="mb-3">
+            <label class="form-label">Exame</label>
+            <select asp-for="NmExame" class="form-select">
+                <option value="">-- Selecione um exame --</option>
+                <option value="SUMÁRIO DE URINA">SUMÁRIO DE URINA</option>
+                <option value="PARACITOLÓGICO DE FEZES">PARACITOLÓGICO DE FEZES</option>
+            </select>
+            <span asp-validation-for="NmExame" class="text-danger"></span>
+        </div>
+
+        <!-- Dropdown de Material -->
+        <div class="mb-3">
+            <label class="form-label">Material</label>
+            <select asp-for="Material" class="form-select">
+                <option value="">-- Selecione o material --</option>
+                <option value="URINA">URINA</option>
+                <option value="FEZES">FEZES</option>
+            </select>
+            <span asp-validation-for="Material" class="text-danger"></span>
+        </div>
+
+        <!-- Observação -->
+        <div class="mb-3">
+            <label asp-for="Observacao" class="form-label">Observação</label>
+            <textarea asp-for="Observacao" class="form-control"></textarea>
+            <span asp-validation-for="Observacao" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-save"></i> Salvar
+        </button>
+        <a asp-action="Index" asp-route-pacienteId="@Model.PacienteId" class="btn btn-secondary">
+            Cancelar
+        </a>
+    </form>
+</div>

@@ -1,0 +1,113 @@
+﻿@model ClinicaPacientesViewModel
+@using Microlab.web.Models
+@using X.PagedList
+@using X.PagedList.Mvc.Core
+
+<div class="container mt-4">
+    <h2>Pacientes da clínica: @Model.Clinica.Nome</h2>
+
+    <!-- 🔍 Barra de Pesquisa -->
+    <form asp-action="Index" method="get" class="row g-2 mb-3">
+        <input type="hidden" name="clinicaId" value="@Model.Clinica.ClinicaId" />
+
+        <div class="col-md-8">
+            <input type="text"
+                   name="searchTerm"
+                   value="@Model.SearchTerm"
+                   class="form-control"
+                   placeholder="Buscar por Protocolo, Nome ou CPF..." />
+        </div>
+
+        <div class="col-md-2">
+            <select name="pageSize" class="form-select" onchange="this.form.submit()">
+                <option value="10" selected="@(Model.PageSize == 10 ? "selected" : null)">10 por página</option>
+                <option value="20" selected="@(Model.PageSize == 20 ? "selected" : null)">20 por página</option>
+                <option value="50" selected="@(Model.PageSize == 50 ? "selected" : null)">50 por página</option>
+                <option value="100" selected="@(Model.PageSize == 100 ? "selected" : null)">100 por página</option>
+            </select>
+        </div>
+
+        <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Pesquisar
+            </button>
+        </div>
+
+        <div class="col-md-2 d-grid">
+            <a asp-action="Index" asp-route-clinicaId="@Model.Clinica.ClinicaId" class="btn btn-secondary">
+                <i class="bi bi-arrow-clockwise"></i> Limpar
+            </a>
+        </div>
+    </form>
+
+    <!-- 📋 Tabela de Pacientes -->
+    <table class="table table-hover shadow-sm rounded">
+        <thead class="table-dark">
+            <tr>
+                <th>Protocolo</th>
+                <th>Nome</th>
+                <th>Idade</th>
+                <th>Data Nascimento</th>
+                <th>CPF</th>
+                <th>RG</th>
+                <th>Qtd. Exames</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Pacientes.Any())
+            {
+                foreach (var paciente in Model.Pacientes)
+                {
+                    <tr>
+                        <td>@paciente.Protocolo</td>
+                        <td>@paciente.Nome</td>
+                        <td>@paciente.Idade</td>
+                        <td>@paciente.DataNascimento.ToString("dd/MM/yyyy")</td>
+                        <td>@paciente.Cpf</td>
+                        <td>@paciente.Rg</td>
+                        <td>@paciente.QtdExames</td>
+                        <td>
+                            <a asp-controller="Exames"
+                               asp-action="Index"
+                               asp-route-pacienteId="@paciente.PacienteId"
+                               class="btn btn-info btn-sm">
+                                Ver Exames
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8" class="text-center text-muted">
+                        Nenhum paciente encontrado para esta busca.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- 📌 Paginação -->
+    <div class="d-flex justify-content-center">
+        @Html.PagedListPager(Model.Pacientes, page => Url.Action("Index",
+                 new
+                 {
+                     page,
+                     searchTerm = Model.SearchTerm,
+                     clinicaId = Model.Clinica.ClinicaId,
+                     pageSize = Model.PageSize
+                 }),
+                 new PagedListRenderOptions
+        {
+            DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+            DisplayLinkToLastPage = PagedListDisplayMode.Always,
+            DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+            DisplayLinkToNextPage = PagedListDisplayMode.Always,
+            MaximumPageNumbersToDisplay = 5,
+            LiElementClasses = new[] { "page-item" },
+            PageClasses = new[] { "page-link" }
+        })
+    </div>
+</div>

@@ -1,0 +1,45 @@
+# Build & cache
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# IDEs
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# VS Code
+.vscode/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# Ferramentas JetBrains/Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# SPA/Front
+node_modules/
+**/wwwroot/lib/
+**/wwwroot/dist/
+
+# Logs & SO
+*.log
+*.tlog
+.DS_Store
+Thumbs.db
+
+# Banco local
+*.db
+*.sqlite
+*.sqlite3
+
+# Publicações locais
+*.Publish.xml

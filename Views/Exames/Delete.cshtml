@@ -1,0 +1,20 @@
+﻿@using Microlab.web.Models.Entities
+@model Exame
+
+<div class="container mt-4">
+    <h2>Excluir Exame</h2>
+    <hr />
+
+    <div class="alert alert-danger">
+        Tem certeza que deseja excluir o exame <strong>@Model.NmExame</strong> do paciente <strong>@Model.Paciente.Nome</strong>?
+    </div>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="ExameId" />
+
+        <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Confirmar Exclusão
+        </button>
+        <a asp-action="Index" asp-route-pacienteId="@Model.PacienteId" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>

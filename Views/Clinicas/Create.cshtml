@@ -1,0 +1,24 @@
+﻿@using Microlab.web.Models.Entities
+@model Clinica
+
+@{
+    ViewData["Title"] = "Cadastrar Clínica";
+}
+
+<h2 class="mb-4">Cadastrar Clínica</h2>
+
+<form asp-action="Create" method="post" class="shadow-sm p-4 bg-light rounded">
+    <div class="mb-3">
+        <label asp-for="Nome" class="form-label">Nome da Clínica</label>
+        <input asp-for="Nome" class="form-control" placeholder="Digite o nome da clínica" />
+        <span asp-validation-for="Nome" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Salvar</button>
+    <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

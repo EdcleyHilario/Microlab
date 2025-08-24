@@ -1,0 +1,60 @@
+﻿@using Microlab.web.Models.Entities
+@model Paciente
+
+<div class="container mt-4">
+    <h2>Exames do Paciente: @Model.Nome</h2>
+    <p class="text-muted">Clínica: @Model.Clinica.Nome</p>
+
+    <div class="mb-3">
+        <a asp-action="Create" asp-route-pacienteId="@Model.PacienteId" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Novo Exame
+        </a>
+        <a asp-controller="Paciente" asp-action="Index" asp-route-clinicaId="@Model.ClinicaId" class="btn btn-secondary">
+            Voltar para Pacientes
+        </a>
+    </div>
+
+    @if (Model.Exames.Any())
+    {
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Exame</th>
+                    <th>Método</th>
+                    <th>Material</th>
+                    <th>Observação</th>
+                    <th>Status</th>
+                    <th>Data Digitação</th>
+                    <th>Imprimir</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var exame in Model.Exames)
+                {
+                    <tr>
+                        <td>@exame.NmExame</td>
+                        <td>@exame.Metodo</td>
+                        <td>@exame.Material</td>
+                        <td>@exame.Observacao</td>
+                        <td>
+                            <span class="badge @(exame.Status == "Liberado" ? "bg-success" : "bg-danger")">
+                                @exame.Status
+                            </span>
+                        </td>
+                        <td>@exame.DataDigitacao.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <a asp-action="Imprimir" asp-route-id="@exame.ExameId" class="btn btn-sm btn-danger">
+                                <i class="bi bi-trash"></i> Imprimir
+                            </a>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-warning">Nenhum exame cadastrado para este paciente.</div>
+    }
+</div>

@@ -1,0 +1,38 @@
+﻿@using Microlab.web.Models.Entities
+@model IEnumerable<Clinica>
+
+@{
+    ViewData["Title"] = "Minhas Clínicas";
+}
+
+<h2 class="mb-3">Minhas Clínicas</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">+ Nova Clínica</a>
+</p>
+
+<table class="table table-striped table-hover shadow-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>Nome</th>
+            <th>Pacientes</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var clinica in Model)
+        {
+            <tr>
+                <td>@clinica.Nome</td>
+                <td>@clinica.Pacientes.Count()</td>
+                <td>
+                    <!-- Botão para cadastrar novo paciente -->
+                    <a asp-controller="Paciente" asp-action="Add" asp-route-clinicaId="@clinica.ClinicaId"
+                       class="btn btn-success btn-sm">
+                        + Novo Paciente
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,24 @@
+﻿@page
+@using Microlab.web.Areas.Identity.Pages.Account
+@model RegisterConfirmationModel
+@{
+    ViewData["Title"] = "Confirme seu e-mail";
+}
+
+<h1>@ViewData["Title"]</h1>
+@{
+    if (@Model.DisplayConfirmAccountLink)
+    {
+<p>
+    Não recebeu nada em seu e-mail? <br />
+            <a id="confirm-link" href="@Model.EmailConfirmationUrl"> Então clique aqui para reenviar o e-mail de confirmação!</a>
+</p>
+    }
+    else
+    {
+<p>
+            Verifique seu e-mail para confirmar sua conta.
+</p>
+    }
+}
+

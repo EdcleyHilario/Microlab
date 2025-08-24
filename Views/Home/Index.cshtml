@@ -1,0 +1,163 @@
+﻿@model HomeViewModel
+@using System.Text.Json
+@using Microlab.web.Models
+@{
+    ViewData["Title"] = "Dashboard";
+}
+@{
+    var exameAtual = ViewBag.Exame as string;
+}
+<h2 class="mb-4">Dashboard - Pacientes</h2>
+<!-- 📊 Cards Compactos e Centralizados -->
+<div class="d-flex justify-content-center flex-wrap gap-3 mb-4">
+
+    <!-- Sumário de Urina -->
+    <div class="card text-white bg-primary p-2" style="width: 13rem;">
+        <div class="card-body text-center">
+            <h6 class="card-title">Sumário de Urina</h6>
+            <p class="card-text fs-4">@Model.Pacientes.Count(p => p.Exame == "SUMÁRIO DE URINA")</p>
+            
+        </div>
+    </div>
+
+    <!-- Parasitológico -->
+    <div class="card text-white bg-warning p-2" style="width: 13rem;">
+        <div class="card-body text-center">
+            <h6 class="card-title">Parasitológico</h6>
+            <p class="card-text fs-4">@Model.Pacientes.Count(p => p.Exame == "PARACITOLÓGICO DE FEZES")</p>
+            
+        </div>
+    </div>
+
+    <!-- Liberados -->
+    <div class="card text-white bg-success p-2" style="width: 13rem;">
+        <div class="card-body text-center">
+            <h6 class="card-title">Liberados</h6>
+            <p class="card-text fs-4">@Model.Pacientes.Count(p => p.Liberado)</p>
+            
+        </div>
+    </div>
+
+    <!-- Solicitados -->
+    <div class="card text-white bg-danger p-2" style="width: 13rem;">
+        <div class="card-body text-center">
+            <h6 class="card-title">Solicitados</h6>
+            <p class="card-text fs-4">@Model.Pacientes.Count(p => !p.Liberado)</p>
+            
+        </div>
+    </div>
+
+</div>
+<!-- 🔎 Formulário de Filtros -->
+<form asp-action="Index" method="get" class="row g-3 mb-4">
+    <input type="hidden" name="clinicaId" value="@Model.ClinicaId" />
+
+    <div class="col-md-3">
+        <label class="form-label">Exame</label>
+        <select name="exame" class="form-select">
+            <option value="" selected="@(string.IsNullOrEmpty(exameAtual) ? "selected" : null)">Todos</option>
+            <option value="SUMÁRIO DE URINA" selected="@(exameAtual == "SUMÁRIO DE URINA" ? "selected" : null)">
+                SUMÁRIO DE URINA
+            </option>
+            <option value="PARACITOLÓGICO DE FEZES" selected="@(exameAtual == "PARACITOLÓGICO DE FEZES" ? "selected" : null)">
+                PARACITOLÓGICO DE FEZES
+            </option>
+        </select>
+
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Data Início</label>
+        <input type="date" name="inicio" class="form-control" value="@(Model.Inicio?.ToString("yyyy-MM-dd"))" />
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Data Fim</label>
+        <input type="date" name="fim" class="form-control" value="@(Model.Fim?.ToString("yyyy-MM-dd"))" />
+    </div>
+
+    <div class="col-md-3 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+    </div>
+</form>
+
+<!-- Tabela dos pacientes com paginação -->
+<h5>Últimas Solicitações</h5>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Idade</th>
+            <th>Exame</th>
+            <th>Material</th>
+            <th>Solicitante</th>
+            <th>Situação</th>
+            <th>Data Solicitação</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var paciente in Model.Pacientes)
+        {
+            <tr>
+                <td>@paciente.Nome</td>
+                <td>@paciente.Idade</td>
+                <td>@paciente.Exame</td>
+                <td>@paciente.Material</td>
+                <td>@paciente.Solicitante</td>
+                <td class="@(paciente.Liberado ? "alert-success" : "alert-danger")">
+                    @(paciente.Liberado ? "Liberado" : "Solicitado")
+                </td>
+                <td>@paciente.DataSolicitacao.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Paginação -->
+@if (Model.TotalPages > 1)
+{
+    <nav>
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { page = Model.CurrentPage - 1, exame = Model.Exame, inicio = Model.Inicio?.ToString("yyyy-MM-dd"), fim = Model.Fim?.ToString("yyyy-MM-dd") })">Anterior</a>
+            </li>
+
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new { page = i, exame = Model.Exame, inicio = Model.Inicio?.ToString("yyyy-MM-dd"), fim = Model.Fim?.ToString("yyyy-MM-dd") })">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { page = Model.CurrentPage + 1, exame = Model.Exame, inicio = Model.Inicio?.ToString("yyyy-MM-dd"), fim = Model.Fim?.ToString("yyyy-MM-dd") })">Próximo</a>
+            </li>
+        </ul>
+    </nav>
+}
+<div class="btn-group mb-3" role="group" aria-label="Filtro Situação">
+    <a asp-action="Index" asp-route-situacao="" class="btn btn-outline-secondary @(string.IsNullOrEmpty(Model.Situacao) ? "active" : "")">
+        Todos
+    </a>
+    <a asp-action="Index" asp-route-situacao="Solicitado" class="btn btn-outline-danger @(Model.Situacao == "Solicitado" ? "active" : "")">
+        Solicitados
+    </a>
+    <a asp-action="Index" asp-route-situacao="Liberado" class="btn btn-outline-success @(Model.Situacao == "Liberado" ? "active" : "")">
+        Liberados
+    </a>
+</div>
+<!-- Gráfico de Barras -->
+<div class="mb-4">
+    <canvas id="graficoExamesMultiAxis"
+            data-labels='@JsonSerializer.Serialize(Model.Labels)'
+            data-urina='@JsonSerializer.Serialize(Model.UrinaPorData)'
+            data-fezes='@JsonSerializer.Serialize(Model.FezesPorData)'>
+    </canvas>
+</div>
+
+
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/dashboard.js"></script>
+}

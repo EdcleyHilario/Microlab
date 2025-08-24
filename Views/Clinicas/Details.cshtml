@@ -1,0 +1,42 @@
+﻿@using Microlab.web.Models.Entities
+@model Clinica
+
+@{
+    ViewData["Title"] = "Detalhes da Clínica";
+}
+
+<h2>Detalhes da Clínica</h2>
+
+<div class="card shadow-sm p-4 mb-4">
+    <h4>@Model.Nome</h4>
+    <p><strong>Usuário:</strong> @Model.UsuarioId</p>
+</div>
+
+<h5>Pacientes cadastrados</h5>
+
+@if (Model.Pacientes.Any())
+{
+    <table class="table table-bordered table-hover">
+        <thead class="table-secondary">
+            <tr>
+                <th>Nome</th>
+                <th>Data Solicitação</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model.Pacientes)
+            {
+                <tr>
+                    <td>@p.Nome</td>
+                    <td>@p.DataSolicitacao.ToString("dd/MM/yyyy")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p class="text-muted">Nenhum paciente cadastrado ainda.</p>
+}
+
+<a asp-action="Index" class="btn btn-secondary">Voltar</a>

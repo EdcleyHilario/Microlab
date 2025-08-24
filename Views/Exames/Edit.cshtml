@@ -1,0 +1,56 @@
+﻿@using Microlab.web.Models.Entities
+@model Exame
+
+<div class="container mt-4">
+    <h2>Editar Exame</h2>
+    <hr />
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="ExameId" />
+        <input type="hidden" asp-for="PacienteId" />
+
+        <div class="mb-3">
+            <label asp-for="NmExame" class="form-label"></label>
+            <input asp-for="NmExame" class="form-control" />
+            <span asp-validation-for="NmExame" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Metodo" class="form-label"></label>
+            <input asp-for="Metodo" class="form-control" />
+            <span asp-validation-for="Metodo" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Material" class="form-label"></label>
+            <input asp-for="Material" class="form-control" />
+            <span asp-validation-for="Material" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Digitador" class="form-label"></label>
+            <input asp-for="Digitador" class="form-control" />
+            <span asp-validation-for="Digitador" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Status" class="form-label"></label>
+            <select asp-for="Status" class="form-select">
+                <option value="Solicitado">Solicitado</option>
+                <option value="Liberado">Liberado</option>
+            </select>
+            <span asp-validation-for="Status" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Observacao" class="form-label"></label>
+            <textarea asp-for="Observacao" class="form-control"></textarea>
+            <span asp-validation-for="Observacao" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-save"></i> Salvar Alterações
+        </button>
+        <a asp-action="Index" asp-route-pacienteId="@Model.PacienteId" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
