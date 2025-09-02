@@ -13,27 +13,15 @@ namespace Microlab.web.Models.Entities
 
         [Required(ErrorMessage = "Idade é Obrigatória")]
         public int Idade { get; set; }
+        public string Rg { get; set; }
+        public string Cpf { get; set; }
 
         [Required(ErrorMessage = "Data de Nascimento é Obrigatória")]
         public DateTime DataNascimento { get; set; }
 
         public string Solicitante { get; set; }
 
-        [Required(ErrorMessage = "Protocolo é Obrigatório")]
-        public int Protocolo { get; set; }
-
-        public string Rg { get; set; }
-        public string Cpf { get; set; }
-
-        [AllowedValues("SUMÁRIO DE URINA", "PARACITOLÓGICO DE FEZES", ErrorMessage = "Exame inválido.")]
-        public string Exame { get; set; }
-
-        [AllowedValues("URINA", "FEZES", ErrorMessage = "Material inválido.")]
-        public string Material { get; set; }
-
-        public DateTime DataSolicitacao { get; set; } = DateTime.Today;
-
-        public bool Liberado { get; set; } = false;
+        public DateTime DataSolicitacao { get; set; } = DateTime.Now;
 
         [Required]
         public Guid ClinicaId { get; set; }

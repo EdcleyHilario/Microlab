@@ -20,14 +20,7 @@
     <!-- Campo oculto para manter o ClinicaId -->
     <input type="hidden" asp-for="ClinicaId" />
 
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <label asp-for="Protocolo" class="form-label">Protocolo</label>
-            <input asp-for="Protocolo" type="text" class="form-control" />
-            <span asp-validation-for="Protocolo" class="text-danger"></span>
-        </div>
-    </div>
-
+   
     <div class="row mb-3">
         <div class="col-md-6">
             <label asp-for="Nome" class="form-label">Nome</label>
@@ -35,9 +28,9 @@
             <span asp-validation-for="Nome" class="text-danger"></span>
         </div>
         <div class="col-md-6">
-            <label asp-for="Cpf" class="form-label">CPF</label>
-            <input asp-for="Cpf" class="form-control" placeholder="000.000.000-00" />
-            <span asp-validation-for="Cpf" class="text-danger"></span>
+            <label asp-for="Idade" class="form-label">Idade</label>
+            <input asp-for="Idade" class="form-control" />
+            <span asp-validation-for="Idade" class="text-danger"></span>
         </div>
     </div>
 
@@ -48,41 +41,19 @@
             <span asp-validation-for="Rg" class="text-danger"></span>
         </div>
         <div class="col-md-6">
+            <label asp-for="Cpf" class="form-label">CPF</label>
+            <input asp-for="Cpf" class="form-control" placeholder="000.000.000-00" />
+            <span asp-validation-for="Cpf" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-6">
             <label asp-for="DataNascimento" class="form-label">Data de Nascimento</label>
             <input asp-for="DataNascimento" type="date" class="form-control" />
             <span asp-validation-for="DataNascimento" class="text-danger"></span>
         </div>
     </div>
 
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <label asp-for="Idade" class="form-label">Idade</label>
-            <input asp-for="Idade" class="form-control" />
-            <span asp-validation-for="Idade" class="text-danger"></span>
-        </div>
-        <div class="col-md-6">
-            <label asp-for="DataSolicitacao" class="form-label">Data da Solicitação</label>
-            <input asp-for="DataSolicitacao" type="date" class="form-control" />
-            <span asp-validation-for="DataSolicitacao" class="text-danger"></span>
-        </div>
-    </div>
-
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <label asp-for="Exame" class="form-label">Exame</label>
-            <select asp-for="Exame" class="form-select" asp-items="@(new SelectList(Model.ExamesDisponiveis))">
-                <option value="">-- Selecione o exame --</option>
-            </select>
-            <span asp-validation-for="Exame" class="text-danger"></span>
-        </div>
-        <div class="col-md-6">
-            <label asp-for="Material" class="form-label">Material</label>
-            <select asp-for="Material" class="form-select" asp-items="@(new SelectList(Model.MateriaisDisponiveis))">
-                <option value="">-- Selecione o material --</option>
-            </select>
-            <span asp-validation-for="Material" class="text-danger"></span>
-        </div>
-    </div>
 
     <button type="submit" class="btn btn-success">Cadastrar Paciente</button>
     <a asp-action="Index" asp-route-clinicaId="@Model.ClinicaId" class="btn btn-secondary">Voltar</a>
@@ -90,7 +61,7 @@
 
 <hr class="my-4" />
 
-<h3>Ultimas 10 solisitações</h3>
+<h3>Ultimos cadastrados</h3>
 @if (Model.Pacientes != null && Model.Pacientes.Any())
 {
     <table class="table table-striped table-hover">
@@ -98,7 +69,6 @@
             <tr>
                 <th>Nome</th>
                 <th>CPF</th>
-                <th>Exame</th>
                 <th>Data Solicitação</th>
                 <th>Ações</th>
             </tr>
@@ -109,7 +79,6 @@
                 <tr>
                     <td>@paciente.Nome</td>
                     <td>@paciente.Cpf</td>
-                    <td>@paciente.Exame</td>
                     <td>@paciente.DataSolicitacao.ToString("dd/MM/yyyy")</td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@paciente.PacienteId" class="btn btn-warning btn-sm">Editar</a>

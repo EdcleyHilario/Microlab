@@ -20,7 +20,7 @@ namespace Microlab.web.Controllers
             db = context;
         }
         [Authorize]
-        public async Task<IActionResult> Index(string search, string exame, string situacao, DateTime? inicio, DateTime? fim, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> Index( string search, string exame, string situacao, DateTime? inicio, DateTime? fim, int page = 1, int pageSize = 10)
         {
             // 1. Pega o usuário logado
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -31,79 +31,81 @@ namespace Microlab.web.Controllers
             var clinica = await db.Clinicas
                 .FirstOrDefaultAsync(c => c.UsuarioId == userId);
 
-            // 3. Se não existir, redireciona para cadastro de clínica
             if (clinica == null)
                 return RedirectToAction("Create", "Clinicas");
 
             var clinicaId = clinica.ClinicaId;
 
-            // 4. Consulta pacientes da clínica usando DbSet
-            var query = db.Pacientes.Where(p => p.ClinicaId == clinicaId);
+            // 3. Consulta exames da clínica
+            var query = db.Exames
+                .Include(e => e.Paciente)
+                .Where(e => e.ClinicaId == clinicaId);
 
-            // 5. Aplica filtros
+            // 4. Aplica filtros
             if (!string.IsNullOrEmpty(search))
-                query = query.Where(p => p.Nome.Contains(search) || p.Cpf.Contains(search));
+                query = query.Where(e => e.Paciente.Nome.Contains(search) || e.Paciente.Cpf.Contains(search));
 
             if (!string.IsNullOrEmpty(exame))
-                query = query.Where(p => p.Exame == exame);
+                query = query.Where(e => e.NmExame == exame);
 
             if (inicio.HasValue)
-                query = query.Where(p => p.DataSolicitacao >= inicio.Value);
+                query = query.Where(e => e.DataDigitacao >= inicio.Value);
 
             if (fim.HasValue)
-                query = query.Where(p => p.DataSolicitacao <= fim.Value);
+                query = query.Where(e => e.DataDigitacao <= fim.Value);
 
-            // 🔹 Filtro por situação
             if (!string.IsNullOrEmpty(situacao))
             {
                 if (situacao == "Liberado")
-                    query = query.Where(p => p.Liberado);
+                    query = query.Where(e => e.Status);
                 else if (situacao == "Solicitado")
-                    query = query.Where(p => !p.Liberado);
+                    query = query.Where(e => !e.Status);
             }
 
-            // 6. Recupera todos os pacientes filtrados para o gráfico
-            var pacientesParaGrafico = query
-            .OrderBy(p => p.DataSolicitacao)
-            .AsEnumerable() // avaliação em memória
-            .ToList();
+            // 5. Recupera pacientes distintos diretamente no banco
+            var pacientesQuery = query
+                .Select(e => e.Paciente)
+                .Distinct()
+                .OrderByDescending(p => p.DataSolicitacao);
 
+            var totalCount = await pacientesQuery.CountAsync();
 
-            // 7. Paginação para a tabela
-            var totalCount = pacientesParaGrafico.Count;
-            var pacientes = pacientesParaGrafico
-                .OrderByDescending(p => p.DataSolicitacao)
+            var pacientesPagina = await pacientesQuery
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToList();
+                .ToListAsync();
 
-            // 8. Preparar dados do gráfico
-            var datas = pacientesParaGrafico
-                .Select(p => p.DataSolicitacao.ToString("dd/MM"))
+            // 6. Preparar dados do gráfico (exames filtrados)
+            var examesFiltrados = await query
+                .OrderBy(e => e.Paciente.DataSolicitacao)
+                .ToListAsync();
+
+            var datas = examesFiltrados
+                .Select(e => e.Paciente.DataSolicitacao.ToString("dd/MM"))
                 .Distinct()
                 .ToList();
 
             var urinaPorData = datas.Select(d =>
-                pacientesParaGrafico.Count(p => p.DataSolicitacao.ToString("dd/MM") == d && p.Exame == "SUMÁRIO DE URINA")
+                examesFiltrados.Count(e => e.Paciente.DataSolicitacao.ToString("dd/MM") == d && e.NmExame == "SUMÁRIO DE URINA")
             ).ToList();
 
             var fezesPorData = datas.Select(d =>
-                pacientesParaGrafico.Count(p => p.DataSolicitacao.ToString("dd/MM") == d && p.Exame == "PARACITOLÓGICO DE FEZES")
+                examesFiltrados.Count(e => e.Paciente.DataSolicitacao.ToString("dd/MM") == d && e.NmExame == "PARACITOLÓGICO DE FEZES")
             ).ToList();
 
             var liberadosPorData = datas.Select(d =>
-                pacientesParaGrafico.Count(p => p.DataSolicitacao.ToString("dd/MM") == d && p.Liberado)
+                examesFiltrados.Count(e => e.Paciente.DataSolicitacao.ToString("dd/MM") == d && e.Status)
             ).ToList();
 
             var solicitadosPorData = datas.Select(d =>
-                pacientesParaGrafico.Count(p => p.DataSolicitacao.ToString("dd/MM") == d && !p.Liberado)
+                examesFiltrados.Count(e => e.Paciente.DataSolicitacao.ToString("dd/MM") == d && !e.Status)
             ).ToList();
 
-            // 9. Monta o ViewModel
+            // 7. Monta o ViewModel
             var viewModel = new HomeViewModel
             {
                 ClinicaId = clinicaId,
-                Pacientes = pacientes,
+                Pacientes = pacientesPagina, // List<Paciente>
                 Exame = exame,
                 Inicio = inicio,
                 Fim = fim,
@@ -118,10 +120,6 @@ namespace Microlab.web.Controllers
 
             return View(viewModel);
         }
-
-
-
-
 
         [Authorize]
         public IActionResult Privacy()

@@ -38,7 +38,6 @@ using Microsoft.EntityFrameworkCore;
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 pacientesQuery = pacientesQuery.Where(p =>
-                    Convert.ToString(p.Protocolo).Contains(searchTerm) ||
                     p.Nome.Contains(searchTerm) ||
                     p.Cpf.Contains(searchTerm));
             }
@@ -51,7 +50,6 @@ using Microsoft.EntityFrameworkCore;
             .Select(p => new PacienteItemViewModel
             {
                 PacienteId = p.PacienteId,
-                Protocolo = p.Protocolo,
                 Nome = p.Nome,
                 Idade = p.Idade,
                 DataNascimento = p.DataNascimento,
@@ -132,26 +130,11 @@ using Microsoft.EntityFrameworkCore;
                 Rg = viewModel.Rg,
                 Idade = viewModel.Idade,
                 DataNascimento = viewModel.DataNascimento,
-                DataSolicitacao = viewModel.DataSolicitacao,
-                Exame = viewModel.Exame,
-                Material = viewModel.Material,
-                Protocolo = viewModel.Protocolo,
                 Solicitante = clinica.Nome,
                 ClinicaId = clinica.ClinicaId
             };
-            var exame = new Exame
-            {
-                ExameId = Guid.NewGuid(),
-                NmExame = viewModel.Exame,
-                Material = viewModel.Material,
-                Metodo = "Exame Físico-Químico / Microscopia",
-                Digitador = "Sem digitador",
-                Status = "Sem Resultado",
-                Observacao = "Nenhuma",
-                PacienteId = paciente.PacienteId
-            };
+            
             await db.Pacientes.AddAsync(paciente);
-            await db.Exames.AddAsync(exame);
             await db.SaveChangesAsync();
             
             TempData["SuccessMessage"] = "Paciente cadastrado com sucesso!";
@@ -181,10 +164,7 @@ using Microsoft.EntityFrameworkCore;
             paciente.Rg = viewModel.Rg;
             paciente.Idade = viewModel.Idade;
             paciente.DataNascimento = viewModel.DataNascimento;
-            paciente.DataSolicitacao = viewModel.DataSolicitacao;
-            paciente.Exame = viewModel.Exame;
-            paciente.Material = viewModel.Material;
-            paciente.Protocolo = viewModel.Protocolo;
+            paciente.DataSolicitacao = paciente.DataSolicitacao;
             paciente.Solicitante = viewModel.Solicitante;
             
             await db.SaveChangesAsync();

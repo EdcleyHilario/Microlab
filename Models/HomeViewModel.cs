@@ -16,7 +16,7 @@ namespace Microlab.web.Models
 
         // Lista de pacientes
         public List<Paciente> Pacientes { get; set; } = new();
-
+        public List<Exame> Exames { get; set; } = new();
         // Dados do gráfico
         public List<string> Labels { get; set; } = new();
         public List<int> UrinaPorData { get; set; } = new();

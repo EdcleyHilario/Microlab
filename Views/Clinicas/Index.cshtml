@@ -1,5 +1,5 @@
-﻿@using Microlab.web.Models.Entities
-@model IEnumerable<Clinica>
+﻿@using Microlab.web.Models
+@model List<Microlab.web.Models.Entities.Clinica>
 
 @{
     ViewData["Title"] = "Minhas Clínicas";
@@ -24,7 +24,7 @@
         {
             <tr>
                 <td>@clinica.Nome</td>
-                <td>@clinica.Pacientes.Count()</td>
+                <td>@clinica.Pacientes?.Count()</td>
                 <td>
                     <!-- Botão para cadastrar novo paciente -->
                     <a asp-controller="Paciente" asp-action="Add" asp-route-clinicaId="@clinica.ClinicaId"

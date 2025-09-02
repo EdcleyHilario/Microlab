@@ -22,10 +22,12 @@ namespace Microlab.web.Controllers
         // Lista clínicas do usuário logado
         public async Task<IActionResult> Index()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var userId = _userManager.GetUserId(User);
+
             var clinicas = await _context.Clinicas
-                .Where(c => c.UsuarioId == user.Id)
-                .ToListAsync();
+            .Where(c => c.UsuarioId == userId)
+            .Include(c => c.Pacientes)
+            .ToListAsync();
 
             return View(clinicas);
         }

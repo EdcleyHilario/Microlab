@@ -7,7 +7,7 @@
 @{
     var exameAtual = ViewBag.Exame as string;
 }
-<h2 class="mb-4">Dashboard - Pacientes</h2>
+<h2 class="mb-4">Dashboard</h2>
 <!-- 📊 Cards Compactos e Centralizados -->
 <div class="d-flex justify-content-center flex-wrap gap-3 mb-4">
 
@@ -15,7 +15,7 @@
     <div class="card text-white bg-primary p-2" style="width: 13rem;">
         <div class="card-body text-center">
             <h6 class="card-title">Sumário de Urina</h6>
-            <p class="card-text fs-4">@Model.Pacientes.Count(p => p.Exame == "SUMÁRIO DE URINA")</p>
+            <p class="card-text fs-4">@Model.Exames.Count(p => p.NmExame == "SUMÁRIO DE URINA")</p>
             
         </div>
     </div>
@@ -24,7 +24,7 @@
     <div class="card text-white bg-warning p-2" style="width: 13rem;">
         <div class="card-body text-center">
             <h6 class="card-title">Parasitológico</h6>
-            <p class="card-text fs-4">@Model.Pacientes.Count(p => p.Exame == "PARACITOLÓGICO DE FEZES")</p>
+            <p class="card-text fs-4">@Model.Exames.Count(p => p.NmExame == "PARACITOLÓGICO DE FEZES")</p>
             
         </div>
     </div>
@@ -33,7 +33,7 @@
     <div class="card text-white bg-success p-2" style="width: 13rem;">
         <div class="card-body text-center">
             <h6 class="card-title">Liberados</h6>
-            <p class="card-text fs-4">@Model.Pacientes.Count(p => p.Liberado)</p>
+            <p class="card-text fs-4">@Model.Exames.Count(p => p.Status)</p>
             
         </div>
     </div>
@@ -42,7 +42,7 @@
     <div class="card text-white bg-danger p-2" style="width: 13rem;">
         <div class="card-body text-center">
             <h6 class="card-title">Solicitados</h6>
-            <p class="card-text fs-4">@Model.Pacientes.Count(p => !p.Liberado)</p>
+            <p class="card-text fs-4">@Model.Exames.Count(p => !p.Status)</p>
             
         </div>
     </div>
@@ -96,18 +96,16 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var paciente in Model.Pacientes)
+        @foreach (var exame in Model.Exames)
         {
             <tr>
-                <td>@paciente.Nome</td>
-                <td>@paciente.Idade</td>
-                <td>@paciente.Exame</td>
-                <td>@paciente.Material</td>
-                <td>@paciente.Solicitante</td>
-                <td class="@(paciente.Liberado ? "alert-success" : "alert-danger")">
-                    @(paciente.Liberado ? "Liberado" : "Solicitado")
+                <td>@exame.Paciente.Solicitante</td>
+                <td>@exame.Paciente.Nome</td>
+                <td>@exame.NmExame</td>
+                <td class="@(exame.Status ? "alert-success" : "alert-danger")">
+                    @(exame.Status ? "Liberado" : "Solicitado")
                 </td>
-                <td>@paciente.DataSolicitacao.ToShortDateString()</td>
+                <td>@exame.Paciente.DataSolicitacao.ToShortDateString()</td>
             </tr>
         }
     </tbody>

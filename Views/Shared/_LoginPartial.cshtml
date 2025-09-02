@@ -12,7 +12,7 @@
             <a class="nav-link text-dark" asp-area="" asp-controller="Paciente" asp-action="Add">Cadastro</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-controller="Paciente" asp-action="Index" asp-route-clinicaId="@Model.ClinicaId">Resultado</a>
+            <a class="nav-link text-dark" asp-controller="Paciente" asp-action="Index" asp-route-clinicaId="@ViewBag.ClinicaId">Pacientes</a>
         </li>
         <li class="nav-item">
             <a class="nav-link text-dark" asp-area="" asp-controller="Exames" asp-action="Index">Exame</a>

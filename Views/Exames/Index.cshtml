@@ -1,19 +1,79 @@
-﻿@using Microlab.web.Models.Entities
-@model Paciente
+﻿@model PacienteExamesViewModel
+@using X.PagedList
 
 <div class="container mt-4">
-    <h2>Exames do Paciente: @Model.Nome</h2>
-    <p class="text-muted">Clínica: @Model.Clinica.Nome</p>
-
+    <h2>Exames do Paciente: @Model.Paciente.Nome</h2>
+    <p class="text-muted">Clínica: @Model.Paciente.Clinica.Nome</p>
     <div class="mb-3">
-        <a asp-action="Create" asp-route-pacienteId="@Model.PacienteId" class="btn btn-primary">
+        <a asp-action="Create" asp-route-pacienteId="@Model.Paciente.PacienteId" class="btn btn-primary">
             <i class="bi bi-plus-circle"></i> Novo Exame
         </a>
-        <a asp-controller="Paciente" asp-action="Index" asp-route-clinicaId="@Model.ClinicaId" class="btn btn-secondary">
+        <a asp-controller="Paciente" asp-action="Index" asp-route-clinicaId="@Model.Paciente.ClinicaId" class="btn btn-secondary">
             Voltar para Pacientes
         </a>
     </div>
+    <!-- 🔍 Filtros -->
+    <form method="get" class="row g-2 mb-3">
+        <input type="hidden" name="pacienteId" value="@Model.Paciente.PacienteId" />
 
+        <div class="col-md-2">
+            <select name="statusFilter" class="form-select">
+                <option value="">Todos Status</option>
+                <option value="Solicitado" selected="@(Model.StatusFilter=="Solicitado"?"selected":null)">Solicitado</option>
+                <option value="Liberado" selected="@(Model.StatusFilter=="Liberado"?"selected":null)">Liberado</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <select name="tipoExameFilter" class="form-select">
+                <option value="">Todos os Exames</option>
+                @foreach (var tipo in Model.TiposExamesDisponiveis)
+                {
+                    <option value="@tipo" selected="@(Model.TipoExameFilter == tipo ? "selected" : null)">
+                        @tipo
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <input type="date" name="dataInicial" class="form-control" value="@(Model.DataInicial?.ToString("yyyy-MM-dd"))" />
+        </div>
+
+        <div class="col-md-2">
+            <input type="date" name="dataFinal" class="form-control" value="@(Model.DataFinal?.ToString("yyyy-MM-dd"))" />
+        </div>
+
+        <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filtrar</button>
+        </div>
+
+        <div class="col-md-1 d-grid">
+            <a asp-action="Index" asp-route-pacienteId="@Model.Paciente.PacienteId" class="btn btn-secondary"><i class="bi bi-arrow-clockwise"></i> Limpar</a>
+        </div>
+    </form>
+    <div class="mb-3 d-flex gap-2">
+        <a asp-action="ExportarExcel"
+           asp-route-pacienteId="@Model.Paciente.PacienteId"
+           asp-route-statusFilter="@Model.StatusFilter"
+           asp-route-tipoExameFilter="@Model.TipoExameFilter"
+           asp-route-dataInicial="@Model.DataInicial?.ToString("yyyy-MM-dd")"
+           asp-route-dataFinal="@Model.DataFinal?.ToString("yyyy-MM-dd")"
+           class="btn btn-success">
+            <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+        </a>
+
+        <a asp-action="ExportarPdf"
+           asp-route-pacienteId="@Model.Paciente.PacienteId"
+           asp-route-statusFilter="@Model.StatusFilter"
+           asp-route-tipoExameFilter="@Model.TipoExameFilter"
+           asp-route-dataInicial="@Model.DataInicial?.ToString("yyyy-MM-dd")"
+           asp-route-dataFinal="@Model.DataFinal?.ToString("yyyy-MM-dd")"
+           class="btn btn-danger">
+            <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+        </a>
+    </div>
+    <!-- 📋 Tabela de Exames -->
     @if (Model.Exames.Any())
     {
         <table class="table table-bordered table-hover align-middle">
@@ -24,7 +84,7 @@
                     <th>Material</th>
                     <th>Observação</th>
                     <th>Status</th>
-                    <th>Data Digitação</th>
+                    <th>Cadastrado</th>
                     <th>Imprimir</th>
                 </tr>
             </thead>
@@ -37,24 +97,46 @@
                         <td>@exame.Material</td>
                         <td>@exame.Observacao</td>
                         <td>
-                            <span class="badge @(exame.Status == "Liberado" ? "bg-success" : "bg-danger")">
-                                @exame.Status
+                            <span class="badge @(exame.Status ? "bg-success" : "bg-danger")">
+                                @(exame.Status ? "Liberado" : "Solicitado")
                             </span>
                         </td>
-                        <td>@exame.DataDigitacao.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@exame.DataSolicitacao.ToString("dd/MM/yyyy HH:mm")</td>
                         <td>
                             <a asp-action="Imprimir" asp-route-id="@exame.ExameId" class="btn btn-sm btn-danger">
-                                <i class="bi bi-trash"></i> Imprimir
+                                <i class="bi bi-printer"></i> Imprimir
                             </a>
                         </td>
-
                     </tr>
                 }
             </tbody>
         </table>
+
+        <!-- Paginação -->
+        <div class="d-flex justify-content-center">
+            @Html.PagedListPager(Model.Exames, page => Url.Action("Index", new
+                {
+                    page,
+                    pageSize = Model.PageSize,
+                    pacienteId = Model.Paciente.PacienteId,
+                    statusFilter = Model.StatusFilter,
+                    tipoExameFilter = Model.TipoExameFilter,
+                    dataInicial = Model.DataInicial?.ToString("yyyy-MM-dd"),
+                    dataFinal = Model.DataFinal?.ToString("yyyy-MM-dd")
+                }), new PagedListRenderOptions
+   {
+       DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+       DisplayLinkToLastPage = PagedListDisplayMode.Always,
+       DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+       DisplayLinkToNextPage = PagedListDisplayMode.Always,
+       MaximumPageNumbersToDisplay = 5,
+       LiElementClasses = new[] { "page-item" },
+       PageClasses = new[] { "page-link" }
+   })
+        </div>
     }
     else
     {
-        <div class="alert alert-warning">Nenhum exame cadastrado para este paciente.</div>
+        <div class="alert alert-warning">Nenhum exame encontrado para os filtros aplicados.</div>
     }
 </div>

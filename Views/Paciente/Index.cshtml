@@ -15,7 +15,7 @@
                    name="searchTerm"
                    value="@Model.SearchTerm"
                    class="form-control"
-                   placeholder="Buscar por Protocolo, Nome ou CPF..." />
+                   placeholder="Buscar por Nome ou CPF..." />
         </div>
 
         <div class="col-md-2">
@@ -39,19 +39,27 @@
             </a>
         </div>
     </form>
-
+    <hr />
+    <div class="col-md-12">
+        <div style="display: flex; justify-content: flex-end;">
+            <a asp-controller="Paciente" asp-action="Add" asp-route-clinicaId="@Model.ClinicaId"
+       class="btn btn-success btn-sm">
+        + Novo Paciente
+    </a>
+        </div>
+    </div>
+    <br />
     <!-- 📋 Tabela de Pacientes -->
     <table class="table table-hover shadow-sm rounded">
         <thead class="table-dark">
             <tr>
-                <th>Protocolo</th>
                 <th>Nome</th>
                 <th>Idade</th>
                 <th>Data Nascimento</th>
                 <th>CPF</th>
                 <th>RG</th>
                 <th>Qtd. Exames</th>
-                <th></th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -60,7 +68,6 @@
                 foreach (var paciente in Model.Pacientes)
                 {
                     <tr>
-                        <td>@paciente.Protocolo</td>
                         <td>@paciente.Nome</td>
                         <td>@paciente.Idade</td>
                         <td>@paciente.DataNascimento.ToString("dd/MM/yyyy")</td>

@@ -4,6 +4,7 @@ using Microlab.web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Webyeste.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250831150120_TB_Clinica_01")]
+    partial class TB_Clinica_01
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,9 +56,6 @@ namespace Webyeste.Data.Migrations
                     b.Property<DateTime>("DataDigitacao")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DataSolicitacao")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Digitador")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -79,8 +79,9 @@ namespace Webyeste.Data.Migrations
                     b.Property<Guid>("PacienteId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ExameId");
 
@@ -108,12 +109,26 @@ namespace Webyeste.Data.Migrations
                     b.Property<DateTime>("DataSolicitacao")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Exame")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Idade")
                         .HasColumnType("int");
+
+                    b.Property<bool>("Liberado")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Material")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Protocolo")
+                        .HasColumnType("int");
 
                     b.Property<int>("QtdExames")
                         .HasColumnType("int");

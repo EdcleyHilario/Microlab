@@ -21,7 +21,7 @@
                     <ul class="navbar-nav flex-grow-1">
                         
                     </ul>
-                    <partial name="_LoginPartial" />
+                    @await Component.InvokeAsync("LoginPartial")
                 </div>
             </div>
         </nav>
