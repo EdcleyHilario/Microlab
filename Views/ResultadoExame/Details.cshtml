@@ -1,0 +1,125 @@
+﻿@model Microlab.web.Models.Entities.ResultadoExame
+
+<div class="container mt-4">
+    <h2 class="mb-3">Resultado do Exame</h2>
+
+    <!-- Paciente -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Paciente</h5>
+            <p><strong>Nome:</strong> @Model.Exame.Paciente.Nome</p>
+            <p><strong>Idade:</strong> @Model.Exame.Paciente.Idade</p>
+            <p><strong>Data Nascimento:</strong> @Model.Exame.Paciente.DataNascimento.ToString("dd/MM/yyyy")</p>
+            <p><strong>CPF:</strong> @Model.Exame.Paciente.Cpf</p>
+            <p><strong>RG:</strong> @Model.Exame.Paciente.Rg</p>
+            <p><strong>Solicitante:</strong> @Model.Exame.Paciente.Solicitante</p>
+            <p><strong>Clínica:</strong> @Model.Exame.Paciente.Clinica?.Nome</p>
+        </div>
+    </div>
+
+    <!-- Exame -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Exame</h5>
+            <p><strong>Nome do Exame:</strong> @Model.Exame.NmExame</p>
+            <p><strong>Método:</strong> @Model.Exame.Metodo</p>
+            <p><strong>Material:</strong> @Model.Exame.Material</p>
+            <p><strong>Observação:</strong> @Model.Exame.Observacao</p>
+            <p><strong>Status:</strong>
+                <span class="badge @(Model.Exame.Status ? "bg-success" : "bg-danger")">
+                    @(Model.Exame.Status ? "Liberado" : "Solicitado")
+                </span>
+            </p>
+            <p><strong>Data Solicitação:</strong> @Model.Exame.DataSolicitacao.ToString("dd/MM/yyyy HH:mm")</p>
+            <p><strong>Digitado em:</strong> @Model.Exame.DataDigitacao.ToString("dd/MM/yyyy HH:mm") por @Model.Exame.Digitador</p>
+        </div>
+    </div>
+
+    <!-- Status -->
+    <h4>
+        Status:
+        <span class="badge @(Model.StatusResultado == "Positivo" ? "bg-success" : Model.StatusResultado == "Negativo" ? "bg-danger" : "bg-warning")">
+            @Model.StatusResultado
+        </span>
+    </h4>
+</div>
+
+<div class="container mt-4">
+    <h2>Resultado do Exame: @Model.Exame.NmExame</h2>
+    <p class="text-muted">
+        Paciente: <strong>@Model.Exame.Paciente.Nome</strong> <br />
+        Data Resultado: @Model.DataResultado.ToString("dd/MM/yyyy HH:mm")
+    </p>
+
+    <h4>Status: 
+        <span class="badge @(Model.StatusResultado == "Positivo" ? "bg-success" : Model.StatusResultado == "Negativo" ? "bg-danger" : "bg-warning")">
+            @Model.StatusResultado
+        </span>
+    </h4>
+
+    @if (!string.IsNullOrEmpty(Model.ObservacaoGeral))
+    {
+        <div class="alert alert-info">
+            <strong>Observações Gerais:</strong> @Model.ObservacaoGeral
+        </div>
+    }
+
+    <!-- 🔬 Exibir blocos conforme tipo -->
+    @if (Model.StatusResultado == "Positivo")
+    {
+        <hr />
+        <h3>Caracteres Físicos</h3>
+        <table class="table table-sm table-bordered">
+            <tr><th>Volume</th><td>@Model.CaracteresFisicos?.Volume</td></tr>
+            <tr><th>Cor</th><td>@Model.CaracteresFisicos?.Cor</td></tr>
+            <tr><th>Aspecto</th><td>@Model.CaracteresFisicos?.Aspecto</td></tr>
+            <tr><th>Densidade</th><td>@Model.CaracteresFisicos?.Densidade</td></tr>
+            <tr><th>pH</th><td>@Model.CaracteresFisicos?.PH</td></tr>
+            <tr><th>Odor</th><td>@Model.CaracteresFisicos?.Odor</td></tr>
+            <tr><th>Observações</th><td>@Model.CaracteresFisicos?.Obs_Caraterfisico</td></tr>
+        </table>
+
+        <h3>Análise Química</h3>
+        <table class="table table-sm table-bordered">
+            <tr><th>Glicose</th><td>@Model.AnaliseQuimica?.Glicose</td></tr>
+            <tr><th>Proteínas</th><td>@Model.AnaliseQuimica?.Proteinas</td></tr>
+            <tr><th>Urobilinogênio</th><td>@Model.AnaliseQuimica?.Urobilinogenio</td></tr>
+            <tr><th>Nitrito</th><td>@Model.AnaliseQuimica?.Nitrito</td></tr>
+            <tr><th>Corpos Cetônicos</th><td>@Model.AnaliseQuimica?.CorposCetonicos</td></tr>
+            <tr><th>Leucócitos</th><td>@Model.AnaliseQuimica?.Leococitos</td></tr>
+            <tr><th>Sangue</th><td>@Model.AnaliseQuimica?.Sangue</td></tr>
+            <tr><th>Bilirrubina</th><td>@Model.AnaliseQuimica?.Bilirrubina</td></tr>
+            <tr><th>Ácido Ascórbico</th><td>@Model.AnaliseQuimica?.AcidoAscorbico</td></tr>
+            <tr><th>Hemoglobina</th><td>@Model.AnaliseQuimica?.Hemoglobina</td></tr>
+            <tr><th>Observações</th><td>@Model.AnaliseQuimica?.Obs_AnaliseQuimica</td></tr>
+        </table>
+
+        <h3>Sedimentoscopia</h3>
+        <table class="table table-sm table-bordered">
+            <tr><th>Células Epiteliais</th><td>@Model.Sedimentoscopia?.CelulasEpiteliais</td></tr>
+            <tr><th>Leucócitos</th><td>@Model.Sedimentoscopia?.Leucocitos</td></tr>
+            <tr><th>Hemácias</th><td>@Model.Sedimentoscopia?.Hemacias</td></tr>
+            <tr><th>Cristais</th><td>@Model.Sedimentoscopia?.Cristais</td></tr>
+            <tr><th>Bactérias</th><td>@Model.Sedimentoscopia?.Bacterias</td></tr>
+            <tr><th>Cilindros</th><td>@Model.Sedimentoscopia?.Cilindros</td></tr>
+            <tr><th>Observações</th><td>@Model.Sedimentoscopia?.Obs_Sedimentoscopia</td></tr>
+        </table>
+    }
+    else if (Model.StatusResultado == "Negativo")
+    {
+        <hr />
+        <h3>Resultado Negativo</h3>
+        <table class="table table-sm table-bordered">
+            <tr><th>Protozoários</th><td>@Model.Negativo?.Protozoarios</td></tr>
+            <tr><th>Helmintos</th><td>@Model.Negativo?.Helmintos</td></tr>
+            <tr><th>Larvas Encontradas</th><td>@Model.Negativo?.LarvasEncontradas</td></tr>
+            <tr><th>Observações</th><td>@Model.Negativo?.Observacao</td></tr>
+        </table>
+    }
+
+    <div class="mt-3">
+        <a asp-action="Index" asp-controller="Exames" asp-route-pacienteId="@Model.Exame.PacienteId" class="btn btn-secondary">
+            Voltar aos Exames
+        </a>
+    </div>
+</div>

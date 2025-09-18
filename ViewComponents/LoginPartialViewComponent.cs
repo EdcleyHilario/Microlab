@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using Microlab.web.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microlab.web.Data;
 using System.Linq;
+using System.Threading.Tasks;
 
 public class LoginPartialViewComponent : ViewComponent
 {
@@ -20,6 +19,7 @@ public class LoginPartialViewComponent : ViewComponent
     public async Task<IViewComponentResult> InvokeAsync()
     {
         string clinicaId = null;
+        bool isAdmin = false;
 
         if (User.Identity.IsAuthenticated)
         {
@@ -32,12 +32,20 @@ public class LoginPartialViewComponent : ViewComponent
 
             if (clinica != null)
             {
-                clinicaId = clinica.ClinicaId.ToString(); // Converte para string se necessário
+                clinicaId = clinica.ClinicaId.ToString();
+            }
+
+            // Verifica se o usuário tem role "Admin"
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
             }
         }
 
-        // Define o ViewBag para a view do componente
+        // Passa os dados para a view do componente
         ViewBag.ClinicaID = clinicaId;
+        ViewBag.IsAdmin = isAdmin;
 
         return View(); // Views/Shared/Components/LoginPartial/Default.cshtml
     }

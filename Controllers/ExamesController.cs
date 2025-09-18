@@ -2,13 +2,12 @@
 using Microlab.web.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using X.PagedList.Extensions;
 using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Wordprocessing;
 using QuestPDF.Fluent;
-using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using QDocument = QuestPDF.Fluent.Document;
+using QuestPDF.Helpers;
+using X.PagedList.Extensions;
+using Microlab.web.Models;
 
 public class ExamesController : Controller
 {
@@ -19,51 +18,27 @@ public class ExamesController : Controller
         _context = context;
     }
 
-    // GET: Exames do paciente
+    // GET: Lista de exames do paciente
     public async Task<IActionResult> Index(
-    Guid pacienteId,
-    string statusFilter,
-    string tipoExameFilter,
-    DateTime? dataInicial,
-    DateTime? dataFinal,
-    int page = 1,
-    int pageSize = 10)
+        Guid pacienteId,
+        string statusFilter,
+        string tipoExameFilter,
+        DateTime? dataInicial,
+        DateTime? dataFinal,
+        int page = 1,
+        int pageSize = 10)
     {
         var paciente = await _context.Pacientes
-            .Include(p => p.Clinica) 
-            .Include(p => p.Exames)    
+            .Include(p => p.Clinica)
+            .Include(p => p.Exames)
             .FirstOrDefaultAsync(p => p.PacienteId == pacienteId);
 
-        if (paciente == null)
-            return NotFound();
+        if (paciente == null) return NotFound();
 
-        var examesQuery = paciente.Exames.AsQueryable();
+        // 🔹 Filtra exames usando função centralizada
+        var examesQuery = FiltrarExames(paciente, statusFilter, tipoExameFilter, dataInicial, dataFinal);
 
-        // 🔹 Filtro por Status
-        if (!string.IsNullOrEmpty(statusFilter))
-        {
-            if (statusFilter == "Liberado")
-                examesQuery = examesQuery.Where(e => e.Status == true);
-            else if (statusFilter == "Solicitado")
-                examesQuery = examesQuery.Where(e => e.Status == false);
-        }
-
-        // 🔹 Filtro por Tipo de Exame
-        if (!string.IsNullOrEmpty(tipoExameFilter))
-        {
-            examesQuery = examesQuery.Where(e => e.NmExame == tipoExameFilter);
-        }
-
-        // 🔹 Filtro por Datas
-        if (dataInicial.HasValue)
-            examesQuery = examesQuery.Where(e => e.DataSolicitacao >= dataInicial.Value);
-
-        if (dataFinal.HasValue)
-            examesQuery = examesQuery.Where(e => e.DataSolicitacao <= dataFinal.Value);
-
-        var examesPaged = examesQuery
-            .OrderByDescending(e => e.DataSolicitacao)
-            .ToPagedList(page, pageSize);
+        var examesPaged = examesQuery.ToPagedList(page, pageSize);
 
         var vm = new PacienteExamesViewModel
         {
@@ -75,57 +50,49 @@ public class ExamesController : Controller
             DataFinal = dataFinal,
             PageSize = pageSize,
             PageNumber = page,
-            TiposExamesDisponiveis = paciente.Exames
-                .Select(e => e.NmExame)
-                .Distinct()
-                .OrderBy(e => e)
-                .ToList()
+            TiposExamesDisponiveis = paciente.Exames?.Select(e => e.NmExame).Distinct().OrderBy(e => e).ToList() ?? new List<string>()
         };
 
         return View(vm);
     }
 
-
-    // GET: Exames/Create
+    // GET: Criar novo exame
     public IActionResult Create(Guid pacienteId)
     {
         var exame = new Exame
         {
-            PacienteId = pacienteId
+            PacienteId = pacienteId,
+            DataSolicitacao = DateTime.Now,
+            DataDigitacao = DateTime.Now,
+            Metodo = "Exame Físico-Químico / Microscopia",
+            Digitador = "Sem digitador",
+            Status = false
         };
         return View(exame);
     }
 
-    // POST: Exames/Create
+    // POST: Criar exame
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Exame viewModel)
     {
-        if(viewModel.Observacao == null) { viewModel.Observacao = "Nenhuma Observação"; }
-        var exame = new Exame
-        {
-            NmExame = viewModel.NmExame,
-            Material = viewModel.Material,
-            Metodo = "Exame Físico-Químico / Microscopia",
-            Digitador = "Sem digitador",
-            DataSolicitacao = DateTime.Now,
-            Status = false,
-            Observacao = viewModel.Observacao,
-            PacienteId = viewModel.PacienteId
-        };
-        
-        if (!ModelState.IsValid)
-        {
-            exame.ExameId = Guid.NewGuid();
+        if (viewModel.Observacao == null)
+            viewModel.Observacao = "Nenhuma Observação";
 
-            _context.Exames.Add(exame);
+        if (ModelState.IsValid)
+        {
+            viewModel.ExameId = Guid.NewGuid();
+            viewModel.DataSolicitacao = DateTime.Now;
+            viewModel.DataDigitacao = DateTime.Now;
+            _context.Exames.Add(viewModel);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index), new { pacienteId = exame.PacienteId });
+            return RedirectToAction(nameof(Index), new { pacienteId = viewModel.PacienteId });
         }
-        return View(exame);
+
+        return View(viewModel);
     }
 
-    // GET: Exames/Edit
+    // GET: Editar exame
     public async Task<IActionResult> Edit(Guid id)
     {
         var exame = await _context.Exames.FindAsync(id);
@@ -133,7 +100,7 @@ public class ExamesController : Controller
         return View(exame);
     }
 
-    // POST: Exames/Edit
+    // POST: Editar exame
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, Exame exame)
@@ -155,10 +122,11 @@ public class ExamesController : Controller
                 throw;
             }
         }
+
         return View(exame);
     }
 
-    // GET: Exames/Delete
+    // GET: Excluir exame
     public async Task<IActionResult> Delete(Guid id)
     {
         var exame = await _context.Exames
@@ -170,7 +138,7 @@ public class ExamesController : Controller
         return View(exame);
     }
 
-    // POST: Exames/Delete
+    // POST: Confirmar exclusão
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(Guid id)
@@ -186,19 +154,16 @@ public class ExamesController : Controller
         return NotFound();
     }
 
+    // 🔹 Função centralizada de filtragem
     private IQueryable<Exame> FiltrarExames(Paciente paciente, string statusFilter, string tipoExameFilter, DateTime? dataInicial, DateTime? dataFinal)
     {
-        var query = paciente.Exames.AsQueryable();
+        var query = paciente.Exames?.AsQueryable() ?? Enumerable.Empty<Exame>().AsQueryable();
 
         if (!string.IsNullOrEmpty(statusFilter))
-        {
             query = statusFilter == "Liberado" ? query.Where(e => e.Status) : query.Where(e => !e.Status);
-        }
 
         if (!string.IsNullOrEmpty(tipoExameFilter))
-        {
             query = query.Where(e => e.NmExame == tipoExameFilter);
-        }
 
         if (dataInicial.HasValue)
             query = query.Where(e => e.DataSolicitacao >= dataInicial.Value);
@@ -209,59 +174,60 @@ public class ExamesController : Controller
         return query.OrderByDescending(e => e.DataSolicitacao);
     }
 
-    
-
-public async Task<IActionResult> ExportarExcel(Guid pacienteId, string statusFilter, string tipoExameFilter, DateTime? dataInicial, DateTime? dataFinal)
-{
-    var paciente = await _context.Pacientes
-        .Include(p => p.Exames)
-        .FirstOrDefaultAsync(p => p.PacienteId == pacienteId);
-
-    if (paciente == null)
-        return NotFound();
-
-    var exames = FiltrarExames(paciente, statusFilter, tipoExameFilter, dataInicial, dataFinal).ToList();
-
-    using var workbook = new XLWorkbook();
-    var worksheet = workbook.Worksheets.Add("Exames");
-
-    // Cabeçalhos
-    worksheet.Cell(1, 1).Value = "Exame";
-    worksheet.Cell(1, 2).Value = "Método";
-    worksheet.Cell(1, 3).Value = "Material";
-    worksheet.Cell(1, 4).Value = "Status";
-    worksheet.Cell(1, 5).Value = "Data Solicitação";
-
-    // Dados
-    for (int i = 0; i < exames.Count; i++)
-    {
-        var e = exames[i];
-        worksheet.Cell(i + 2, 1).Value = e.NmExame;
-        worksheet.Cell(i + 2, 2).Value = e.Metodo;
-        worksheet.Cell(i + 2, 3).Value = e.Material;
-        worksheet.Cell(i + 2, 4).Value = e.Status ? "Liberado" : "Solicitado";
-        worksheet.Cell(i + 2, 5).Value = e.DataSolicitacao.ToString("dd/MM/yyyy HH:mm");
-    }
-
-    using var stream = new MemoryStream();
-    workbook.SaveAs(stream);
-    stream.Position = 0;
-
-    var fileName = $"Exames_{paciente.Nome}_{DateTime.Now:yyyyMMddHHmm}.xlsx";
-    return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
-}
-    public async Task<IActionResult> ExportarPdf(Guid pacienteId, string statusFilter, string tipoExameFilter, DateTime? dataInicial, DateTime? dataFinal)
+    // Exportar Excel
+    public async Task<IActionResult> ExportarExcel(Guid pacienteId, string statusFilter, string tipoExameFilter, DateTime? dataInicial, DateTime? dataFinal)
     {
         var paciente = await _context.Pacientes
             .Include(p => p.Exames)
             .FirstOrDefaultAsync(p => p.PacienteId == pacienteId);
 
-        if (paciente == null)
-            return NotFound();
+        if (paciente == null) return NotFound();
 
         var exames = FiltrarExames(paciente, statusFilter, tipoExameFilter, dataInicial, dataFinal).ToList();
 
-        var pdf = QDocument.Create(container =>
+        using var workbook = new XLWorkbook();
+        var worksheet = workbook.Worksheets.Add("Exames");
+
+        // Cabeçalhos
+        worksheet.Cell(1, 1).Value = "Exame";
+        worksheet.Cell(1, 2).Value = "Método";
+        worksheet.Cell(1, 3).Value = "Material";
+        worksheet.Cell(1, 4).Value = "Status";
+        worksheet.Cell(1, 5).Value = "Data Solicitação";
+
+        // Dados
+        for (int i = 0; i < exames.Count; i++)
+        {
+            var e = exames[i];
+            worksheet.Cell(i + 2, 1).Value = e.NmExame;
+            worksheet.Cell(i + 2, 2).Value = e.Metodo;
+            worksheet.Cell(i + 2, 3).Value = e.Material;
+            worksheet.Cell(i + 2, 4).Value = e.Status ? "Liberado" : "Solicitado";
+            worksheet.Cell(i + 2, 5).Value = e.DataSolicitacao.ToString("dd/MM/yyyy HH:mm");
+        }
+
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        stream.Position = 0;
+
+        var fileName = $"Exames_{paciente.Nome}_{DateTime.Now:yyyyMMddHHmm}.xlsx";
+        return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+    }
+
+    // Exportar PDF
+    public async Task<IActionResult> ExportarPdf(Guid pacienteId, string statusFilter, string tipoExameFilter, DateTime? dataInicial, DateTime? dataFinal)
+    {
+        QuestPDF.Settings.License = LicenseType.Community;
+
+        var paciente = await _context.Pacientes
+            .Include(p => p.Exames)
+            .FirstOrDefaultAsync(p => p.PacienteId == pacienteId);
+
+        if (paciente == null) return NotFound();
+
+        var exames = FiltrarExames(paciente, statusFilter, tipoExameFilter, dataInicial, dataFinal).ToList();
+
+        var pdf = Document.Create(container =>
         {
             container.Page(page =>
             {
@@ -272,7 +238,6 @@ public async Task<IActionResult> ExportarExcel(Guid pacienteId, string statusFil
                 page.Header().Text($"Exames do Paciente: {paciente.Nome}").SemiBold().FontSize(16);
                 page.Content().Table(table =>
                 {
-                    // Cabeçalhos
                     table.ColumnsDefinition(c =>
                     {
                         c.RelativeColumn();
@@ -291,7 +256,6 @@ public async Task<IActionResult> ExportarExcel(Guid pacienteId, string statusFil
                         header.Cell().Text("Data Solicitação");
                     });
 
-                    // Dados
                     foreach (var e in exames)
                     {
                         table.Cell().Text(e.NmExame);

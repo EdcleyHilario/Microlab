@@ -1,0 +1,141 @@
+﻿@model PacienteExamesViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using X.PagedList.Mvc.Core
+
+<div class="container mt-4">
+    <h2>Exames do Paciente: @Model.Paciente.Nome</h2>
+    <p class="text-muted">Clínica: @Model.Paciente.Clinica?.Nome</p>
+
+    <!-- 🔹 Filtros -->
+    @{
+        // Lista de Status
+        var statusList = new List<SelectListItem>
+    {
+    new SelectListItem { Text = "Todos Status", Value = "" },
+    new SelectListItem { Text = "Liberado", Value = "Liberado", Selected = Model.StatusFilter == "Liberado" },
+    new SelectListItem { Text = "Solicitado", Value = "Solicitado", Selected = Model.StatusFilter == "Solicitado" }
+    };
+
+        // Lista de Tipos de Exame
+        var tipoExameList = Model.TiposExamesDisponiveis
+        .Select(e => new SelectListItem
+            {
+                Text = e,
+                Value = e,
+                Selected = Model.TipoExameFilter == e
+            })
+        .ToList();
+        tipoExameList.Insert(0, new SelectListItem { Text = "Todos Tipos", Value = "" });
+    }
+
+    <form method="get" class="row g-2 mb-3">
+        <input type="hidden" name="pacienteId" value="@Model.Paciente.PacienteId" />
+
+        <div class="col-md-2">
+            <select asp-for="StatusFilter" asp-items="statusList" class="form-select" onchange="this.form.submit()"></select>
+        </div>
+
+        <div class="col-md-3">
+            <select asp-for="TipoExameFilter" asp-items="tipoExameList" class="form-select" onchange="this.form.submit()"></select>
+        </div>
+
+        <div class="col-md-2">
+            <input asp-for="DataInicial" type="date" class="form-control" placeholder="Data Inicial" />
+        </div>
+
+        <div class="col-md-2">
+            <input asp-for="DataFinal" type="date" class="form-control" placeholder="Data Final" />
+        </div>
+
+        <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Filtrar
+            </button>
+        </div>
+
+        <div class="col-md-1 d-grid">
+            <a asp-action="Index" asp-route-pacienteId="@Model.Paciente.PacienteId" class="btn btn-secondary">
+                <i class="bi bi-arrow-clockwise"></i> Limpar
+            </a>
+        </div>
+    </form>
+
+    <!-- 🔹 Botão Novo Resultado -->
+    <div class="mb-3 text-end">
+        <a asp-controller="ResultadoExame" asp-action="Create" asp-route-pacienteId="@Model.Paciente.PacienteId" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Novo Resultado
+        </a>
+    </div>
+
+    <!-- 🔹 Tabela de Exames -->
+    @if (Model.Exames.Any())
+    {
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Exame</th>
+                    <th>Método</th>
+                    <th>Material</th>
+                    <th>Status</th>
+                    <th>Data Solicitação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var exame in Model.Exames)
+                {
+                    <tr>
+                        <td>@exame.NmExame</td>
+                        <td>@exame.Metodo</td>
+                        <td>@exame.Material</td>
+                        <td>
+                            <span class="badge @(exame.Status ? "bg-success" : "bg-danger")">
+                                @(exame.Status ? "Liberado" : "Solicitado")
+                            </span>
+                        </td>
+                        <td>@exame.DataSolicitacao.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <a asp-controller="ResultadoExame" asp-action="Details" asp-route-exameId="@exame.ExameId" class="btn btn-info btn-sm">
+                                Ver Resultado
+                            </a>
+                            <a asp-controller="Exames" asp-action="Edit" asp-route-id="@exame.ExameId" class="btn btn-warning btn-sm">
+                                Editar
+                            </a>
+                            <a asp-controller="Exames" asp-action="Delete" asp-route-id="@exame.ExameId" class="btn btn-danger btn-sm">
+                                Excluir
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- 🔹 Paginação -->
+        <div class="d-flex justify-content-center">
+            @Html.PagedListPager(Model.Exames, page => Url.Action("Index", new
+                {
+                    page,
+                    pageSize = Model.PageSize,
+                    pacienteId = Model.Paciente.PacienteId,
+                    StatusFilter = Model.StatusFilter,
+                    TipoExameFilter = Model.TipoExameFilter,
+                    DataInicial = Model.DataInicial?.ToString("yyyy-MM-dd"),
+                    DataFinal = Model.DataFinal?.ToString("yyyy-MM-dd")
+                }),
+                     new X.PagedList.Mvc.Core.PagedListRenderOptions
+                {
+                    DisplayLinkToFirstPage = X.PagedList.Mvc.Core.PagedListDisplayMode.Always,
+                    DisplayLinkToLastPage = X.PagedList.Mvc.Core.PagedListDisplayMode.Always,
+                    DisplayLinkToPreviousPage = X.PagedList.Mvc.Core.PagedListDisplayMode.Always,
+                    DisplayLinkToNextPage = X.PagedList.Mvc.Core.PagedListDisplayMode.Always,
+                    MaximumPageNumbersToDisplay = 5,
+                    LiElementClasses = new[] { "page-item" },
+                    PageClasses = new[] { "page-link" }
+                })
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">Nenhum exame encontrado para este paciente.</div>
+    }
+</div>

@@ -73,6 +73,19 @@
             <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
         </a>
     </div>
+    <div class="mb-3 d-flex justify-content-between">
+        <div>
+            <a asp-action="CreateResultado" asp-route-pacienteId="@Model.Paciente.PacienteId"
+               class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Novo Resultado de Exame
+            </a>
+        </div>
+
+        <div>
+            <!-- Botão Exportar Excel / PDF se quiser -->
+        </div>
+    </div>
+
     <!-- 📋 Tabela de Exames -->
     @if (Model.Exames.Any())
     {

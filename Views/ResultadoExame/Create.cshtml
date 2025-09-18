@@ -1,0 +1,78 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model Microlab.web.Models.ViewModels.ResultadoExameViewModel
+
+<div class="container mt-4">
+    <h2>Resultado do Exame: @Model.NmExame</h2>
+    <p class="text-muted">Paciente: @Model.PacienteNome</p>
+
+    <form asp-action="Create" method="post">
+        <input type="hidden" asp-for="ExameId" />
+
+        <div class="mb-3">
+            <label>Status do Resultado</label>
+            <select asp-for="StatusResultado" class="form-select" id="statusSelect">
+                <option value="">Selecione...</option>
+                <option value="Negativo">Negativo</option>
+                <option value="Positivo">Positivo</option>
+                <option value="Inconclusivo">Inconclusivo</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ObservacaoGeral">Observações Gerais</label>
+            <textarea asp-for="ObservacaoGeral" class="form-control"></textarea>
+        </div>
+
+        <!-- 🔬 BLOCO POSITIVO -->
+        <div id="positivoFields" style="display:none;">
+            <h4>Caracteres Físicos</h4>
+            <input asp-for="CaracteresFisicos.Volume" class="form-control mb-2" placeholder="Volume" />
+            <input asp-for="CaracteresFisicos.Cor" class="form-control mb-2" placeholder="Cor" />
+            <input asp-for="CaracteresFisicos.Aspecto" class="form-control mb-2" placeholder="Aspecto" />
+            <input asp-for="CaracteresFisicos.Densidade" class="form-control mb-2" placeholder="Densidade" />
+            <input asp-for="CaracteresFisicos.PH" class="form-control mb-2" placeholder="pH" />
+            <input asp-for="CaracteresFisicos.Odor" class="form-control mb-2" placeholder="Odor" />
+            <textarea asp-for="CaracteresFisicos.Obs_Caraterfisico" class="form-control mb-2" placeholder="Observações"></textarea>
+
+            <h4>Análise Química</h4>
+            <input asp-for="AnaliseQuimica.Glicose" class="form-control mb-2" placeholder="Glicose" />
+            <input asp-for="AnaliseQuimica.Proteinas" class="form-control mb-2" placeholder="Proteínas" />
+            <input asp-for="AnaliseQuimica.Urobilinogenio" class="form-control mb-2" placeholder="Urobilinogênio" />
+            <input asp-for="AnaliseQuimica.Nitrito" class="form-control mb-2" placeholder="Nitrito" />
+            <textarea asp-for="AnaliseQuimica.Obs_AnaliseQuimica" class="form-control mb-2" placeholder="Observações"></textarea>
+
+            <h4>Sedimentoscopia</h4>
+            <input asp-for="Sedimentoscopia.CelulasEpiteliais" class="form-control mb-2" placeholder="Células Epiteliais" />
+            <input asp-for="Sedimentoscopia.Leucocitos" class="form-control mb-2" placeholder="Leucócitos" />
+            <input asp-for="Sedimentoscopia.Hemacias" class="form-control mb-2" placeholder="Hemácias" />
+            <input asp-for="Sedimentoscopia.Cristais" class="form-control mb-2" placeholder="Cristais" />
+            <input asp-for="Sedimentoscopia.Bacterias" class="form-control mb-2" placeholder="Bactérias" />
+            <textarea asp-for="Sedimentoscopia.Obs_Sedimentoscopia" class="form-control mb-2" placeholder="Observações"></textarea>
+        </div>
+
+        <!-- ❌ BLOCO NEGATIVO -->
+        <div id="negativoFields" style="display:none;">
+            <h4>Resultado Negativo</h4>
+            <input asp-for="Negativo.Protozoarios" class="form-control mb-2" placeholder="Protozoários" />
+            <input asp-for="Negativo.Helmintos" class="form-control mb-2" placeholder="Helmintos" />
+            <input asp-for="Negativo.LarvasEncontradas" class="form-control mb-2" placeholder="Larvas Encontradas" />
+            <textarea asp-for="Negativo.Observacao" class="form-control mb-2" placeholder="Observações"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3">Salvar Resultado</button>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("statusSelect").addEventListener("change", function () {
+            let status = this.value;
+            document.getElementById("positivoFields").style.display = status === "Positivo" ? "block" : "none";
+            document.getElementById("negativoFields").style.display = status === "Negativo" ? "block" : "none";
+        });
+    </script>
+}

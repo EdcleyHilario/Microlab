@@ -1,0 +1,75 @@
+﻿@model Microlab.web.Models.AdminExamesViewModel
+@using X.PagedList.Mvc.Core
+@{
+    ViewData["Title"] = "Gestão de Exames - Admin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form method="get" asp-area="Admin" asp-controller="Exames" asp-action="Index" class="row g-3 mb-3">
+    <div class="col-md-4">
+        <select class="form-select" name="clinicaId">
+            <option value="">Selecione a Clínica</option>
+            @foreach (var c in Model.Clinicas)
+            {
+                <option value="@c.ClinicaId" @(c.ClinicaId == Model.ClinicaId ? "selected" : "")>
+                    @c.Nome
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <input type="date" name="dataInicial" class="form-control" value="@(Model.DataInicial?.ToString("yyyy-MM-dd"))" />
+    </div>
+
+    <div class="col-md-3">
+        <input type="date" name="dataFinal" class="form-control" value="@(Model.DataFinal?.ToString("yyyy-MM-dd"))" />
+    </div>
+
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+    </div>
+</form>
+
+@if (Model.Exames != null && Model.Exames.Any())
+{
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>Exame</th>
+                <th>Material</th>
+                <th>Data Solicitação</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in Model.Exames)
+            {
+                <tr>
+                    <td>@e.Paciente?.Nome</td>
+                    <td>@e.NmExame</td>
+                    <td>@e.Material</td>
+                    <td>@e.DataSolicitacao.ToString("dd/MM/yyyy")</td>
+                    <td>@(e.Status ? "Liberado" : "Solicitado")</td>
+                    <td>
+                        <a asp-area="Admin" asp-controller="ResultadoExame" asp-action="Create" asp-route-exameId="@e.ExameId" class="btn btn-sm btn-success">
+                            Novo Resultado
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-center">
+        @Html.PagedListPager(Model.Exames, page => Url.Action("Index", new { page, ClinicaId = Model.ClinicaId, DataInicial = Model.DataInicial?.ToString("yyyy-MM-dd"), DataFinal = Model.DataFinal?.ToString("yyyy-MM-dd") }))
+    </div>
+}
+else
+{
+    <div class="alert alert-info">Nenhuma solicitação de exame encontrada.</div>
+}

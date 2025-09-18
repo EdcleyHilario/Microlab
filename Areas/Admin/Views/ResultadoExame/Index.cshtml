@@ -1,0 +1,61 @@
+﻿@model List<Microlab.web.Models.Entities.Exame>
+@using Microlab.web.Models.Entities
+
+@{
+    ViewData["Title"] = "Gestão de Exames";
+}
+
+<h2>Gestão de Exames</h2>
+
+<form method="get" class="row g-3 mb-3">
+    <div class="col-md-4">
+        <label for="clinicaId" class="form-label">Clínica</label>
+        <select class="form-select" name="clinicaId" id="clinicaId">
+            <option value="">-- Selecione --</option>
+            @foreach (var c in ViewBag.Clinicas as List<Clinica>)
+            {
+                <option value="@c.ClinicaId">@c.Nome</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <label for="dataInicial" class="form-label">Data Inicial</label>
+        <input type="date" class="form-control" name="dataInicial" id="dataInicial" />
+    </div>
+
+    <div class="col-md-3">
+        <label for="dataFinal" class="form-label">Data Final</label>
+        <input type="date" class="form-control" name="dataFinal" id="dataFinal" />
+    </div>
+
+    <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Paciente</th>
+            <th>Clínica</th>
+            <th>Exame</th>
+            <th>Material</th>
+            <th>Status</th>
+            <th>Data Solicitação</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in Model)
+        {
+            <tr>
+                <td>@e.Paciente.Nome</td>
+                <td>@e.Paciente.Clinica.Nome</td>
+                <td>@e.NmExame</td>
+                <td>@e.Material</td>
+                <td>@(e.Status ? "Liberado" : "Solicitado")</td>
+                <td>@e.DataSolicitacao.ToString("dd/MM/yyyy")</td>
+            </tr>
+        }
+    </tbody>
+</table>

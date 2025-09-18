@@ -1,0 +1,37 @@
+﻿@model Microlab.web.Models.Entities.ResultadoExame
+@{
+    var exame = ViewBag.Exame as Microlab.web.Models.Entities.Exame;
+    ViewData["Title"] = "Novo Resultado de Exame";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="mb-3">
+    <strong>Paciente:</strong> @exame.Paciente.Nome <br />
+    <strong>Exame:</strong> @exame.NmExame <br />
+    <strong>Material:</strong> @exame.Material <br />
+    <strong>Data Solicitação:</strong> @exame.DataSolicitacao.ToString("dd/MM/yyyy")
+</div>
+
+<form asp-action="Create" method="post">
+    <input type="hidden" asp-for="ExameId" />
+
+    <div class="mb-3">
+        <label asp-for="StatusResultado" class="form-label">Status Resultado</label>
+        <select asp-for="StatusResultado" class="form-select">
+            <option value="Negativo">Negativo</option>
+            <option value="Positivo">Positivo</option>
+            <option value="Inconclusivo">Inconclusivo</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ObservacaoGeral" class="form-label">Observação Geral</label>
+        <textarea asp-for="ObservacaoGeral" class="form-control"></textarea>
+    </div>
+
+    <!-- Aqui você pode adicionar os campos de CaractereFisico, AnaliseQuimica, Sedimentoscopia ou Negativo se StatusResultado == Positivo/Negativo -->
+
+    <button type="submit" class="btn btn-success">Salvar Resultado</button>
+    <a asp-area="Admin" asp-controller="Exames" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>
